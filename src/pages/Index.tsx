@@ -142,7 +142,7 @@ const Index = () => {
             <p className="sub">I build machine learning systems for computer vision, medical imaging and LLM applications. Currently a Software Developer Trainee at Mazo Solutions, with an M.Sc. in Data Science and a B.Sc. in Statistics.</p>
             <div className="cta">
               <a className="btn primary" href="#contact">Contact me</a>
-              <a className="btn ghost" href="/assets/Kesavan_E_Resume.pdf" target="_blank" rel="noopener noreferrer"><Download size={16} /> Resume</a>
+              <a className="btn ghost" href="/assets/Kesavan_E_Data_Scientist.pdf" target="_blank" rel="noopener noreferrer"><Download size={16} /> Resume</a>
             </div>
             <div className="social">
               <a href="https://www.linkedin.com/in/kesavan-elumalai/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin /></a>

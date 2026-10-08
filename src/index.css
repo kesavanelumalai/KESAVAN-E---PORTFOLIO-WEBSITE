@@ -120,3 +120,31 @@ input:focus, textarea:focus { outline: none; border-color: var(--accent); }
   .links-nav a { padding: .9rem 1.4rem; }
 }
 @media (max-width: 560px) { .grid3, .stats { grid-template-columns: 1fr; } }
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .10;
+  background-size: 480px 480px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480' fill='none' stroke='%2322d3ee' stroke-width='1'%3E%3Cpath d='M40 60L170 20M40 60L170 130M40 180L170 130M40 180L170 240M40 300L170 240M40 300L170 350M170 20L300 70M170 130L300 70M170 130L300 190M170 240L300 190M170 240L300 310M170 350L300 310M300 70L430 120M300 190L430 120M300 190L430 250M300 310L430 250'/%3E%3Cg fill='%2322d3ee' stroke='none'%3E%3Ccircle cx='40' cy='60' r='4'/%3E%3Ccircle cx='40' cy='180' r='4'/%3E%3Ccircle cx='40' cy='300' r='4'/%3E%3Ccircle cx='170' cy='20' r='4'/%3E%3Ccircle cx='170' cy='130' r='4'/%3E%3Ccircle cx='170' cy='240' r='4'/%3E%3Ccircle cx='170' cy='350' r='4'/%3E%3Ccircle cx='300' cy='70' r='4'/%3E%3Ccircle cx='300' cy='190' r='4'/%3E%3Ccircle cx='300' cy='310' r='4'/%3E%3Ccircle cx='430' cy='120' r='4'/%3E%3Ccircle cx='430' cy='250' r='4'/%3E%3C/g%3E%3Cpath stroke='%23a78bfa' d='M0 430H110L140 460H260L290 430H480'/%3E%3Ccircle cx='110' cy='430' r='3' fill='%23a78bfa' stroke='none'/%3E%3Ccircle cx='290' cy='430' r='3' fill='%23a78bfa' stroke='none'/%3E%3C/svg%3E");
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  right: -50px;
+  bottom: -40px;
+  width: 440px;
+  height: 440px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .07;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%2322d3ee' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M100 45V26'/%3E%3Ccircle cx='100' cy='18' r='7'/%3E%3Crect x='40' y='45' width='120' height='100' rx='22'/%3E%3Ccircle cx='75' cy='88' r='13'/%3E%3Ccircle cx='125' cy='88' r='13'/%3E%3Ccircle cx='75' cy='88' r='4' fill='%2322d3ee'/%3E%3Ccircle cx='125' cy='88' r='4' fill='%2322d3ee'/%3E%3Cpath d='M72 122H128M86 122V133M100 122V133M114 122V133'/%3E%3Crect x='20' y='75' width='20' height='40' rx='6'/%3E%3Crect x='160' y='75' width='20' height='40' rx='6'/%3E%3Cpath d='M70 145V168H130V145M56 168H144'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+@media (max-width: 860px) {
+  body::after { width: 240px; height: 240px; right: -30px; bottom: -20px; }
+}
