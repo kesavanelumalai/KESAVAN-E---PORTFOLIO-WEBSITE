@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TypeAnimation } from 'react-type-animation';
 import { Github, Linkedin, Mail, MapPin, ArrowUpRight, Download, Menu, X } from 'lucide-react';
 
@@ -110,6 +110,9 @@ const Section = ({ id, title, children }: { id: string; title: string; children:
 
 const Index = () => {
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState('home');
+  const navRef = useRef<HTMLElement>(null);
+  const [ink, setInk] = useState({ left: 0, width: 0, on: false });
 
   useEffect(() => {
     const io = new IntersectionObserver(
@@ -120,13 +123,53 @@ const Index = () => {
     return () => io.disconnect();
   }, []);
 
+
+  useEffect(() => {
+    const spy = new IntersectionObserver(
+      (es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id)),
+      { rootMargin: '-45% 0px -50% 0px' }
+    );
+    ['home', ...nav].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) spy.observe(el);
+    });
+    return () => spy.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const place = () => {
+      const a = navRef.current?.querySelector<HTMLElement>('a.on');
+      setInk((p) => (a ? { left: a.offsetLeft, width: a.offsetWidth, on: true } : { ...p, on: false }));
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, [active]);
+
+  useEffect(() => {
+    const move = (e: MouseEvent) => {
+      const c = (e.target as HTMLElement).closest<HTMLElement>('.card');
+      if (!c) return;
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', e.clientX - r.left + 'px');
+      c.style.setProperty('--my', e.clientY - r.top + 'px');
+    };
+    window.addEventListener('mousemove', move);
+    return () => window.removeEventListener('mousemove', move);
+  }, []);
+
   return (
     <div className="site">
+      <div className="progress" aria-hidden="true" />
       <header className="nav">
         <div className="wrap nav-in">
           <a href="#home" className="logo">Kesavan<b>.</b></a>
-          <nav className={open ? 'links-nav open' : 'links-nav'}>
-            {nav.map((n) => <a key={n} href={'#' + n} onClick={() => setOpen(false)}>{n}</a>)}
+          <nav ref={navRef} className={open ? 'links-nav open' : 'links-nav'}>
+            <span className={ink.on ? 'ink show' : 'ink'} style={{ left: ink.left, width: ink.width }} aria-hidden="true" />
+            {nav.map((n) => (
+              <a key={n} href={'#' + n} className={active === n ? 'on' : undefined} onClick={() => setOpen(false)}>{n}</a>
+            ))}
+            <a href="#contact" className="hire" onClick={() => setOpen(false)}>Hire me</a>
           </nav>
           <button className="burger" aria-label="Menu" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
         </div>
