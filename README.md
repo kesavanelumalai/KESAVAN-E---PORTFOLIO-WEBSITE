@@ -1,52 +1,17 @@
-🌐 Kesavan E – Personal Portfolio Website
+# KESAVAN E – Portfolio
 
-Welcome to my personal portfolio repository!
-This website showcases my work, skills, and projects as a Data Scientist, Machine Learning Engineer, and Power BI Developer.
+🔥 [Live Demo on Firebase](https://portfolio-kesavan-e.web.app/)
 
-🚀 About This Portfolio
+<<<<<<< HEAD
+Built using Vite + React + ShadCN + Firebase Hosting
 
-This portfolio is designed to highlight:
 
-🎓 My education & professional summary
+for to run the app:
 
-📊 Data Science & Machine Learning projects
+in terminal run : 
 
-🤖 Deep Learning models (LSTM, GRU, BiLSTM + XGBoost)
-
-📈 Power BI dashboards & analytics
-
-🛠 Technical skills (Python, SQL, ML, DL, Visualization Tools)
-
-🏆 Certifications & achievements
-
-📄 Resume downloadable section
-
-📬 Contact information for collaboration and opportunities
-
-🛠 Tech Stack
-
-Frontend: HTML, CSS, JavaScript
-
-Tools Used: VS Code, Git, GitHub
-
-Deployment: GitHub Pages
-
-🔗 Live Portfolio Link
-
-👉 https://kesavanelumalaitech-portfolio.netlify.app/
-
-📫 Contact
-
-If you'd like to collaborate or discuss opportunities, feel free to reach out:
-
-Name: Kesavan E
-
-Email: kesavan20021111@gmail.com
-
-Role: Data Scientist | Data Analyst | ML Engineer
-
-Location: India
-
-⭐ Support
-
-If you like this work, consider giving the repository a ⭐ on GitHub!
+1. pip install npm
+2. npm run dev
+=======
+Built using Vite + React + ShadCN + Firebase Hosting
+>>>>>>> b0aa8356b768bf38f5112e7cea313227a05b7506
