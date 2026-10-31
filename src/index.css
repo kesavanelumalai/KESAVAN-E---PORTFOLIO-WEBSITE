@@ -202,3 +202,26 @@ body::after {
 form.card:hover { transform: none; }
 .btn.primary { box-shadow: 0 10px 40px -10px #22d3ee; }
 .photo img { box-shadow: 0 30px 80px -30px rgba(34,211,238,.5); }
+
+/* Hire modal */
+.hm-back { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 1rem; background: rgba(5,8,16,.72); backdrop-filter: blur(6px); animation: hmfade .2s ease; }
+.hm { position: relative; width: min(440px, 100%); background: linear-gradient(160deg, #18213a, #0f1626); border: 1px solid rgba(34,211,238,.35); border-radius: 22px; padding: 1.8rem; box-shadow: 0 30px 80px -20px rgba(34,211,238,.35); animation: hmpop .3s cubic-bezier(.2,.8,.2,1); }
+.hm h3 { margin: 0 0 .3rem; font-size: 1.6rem; }
+.hm .hello { margin-bottom: .5rem; }
+.hm-sub { color: var(--muted); margin: 0 0 1.3rem; font-size: .95rem; }
+.hm-x { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.hm-x:hover { color: var(--accent); border-color: var(--accent); }
+.hm-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .7rem; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.03); transition: border-color .2s, transform .2s; }
+.hm-row:hover { border-color: var(--accent); transform: translateY(-2px); }
+.hm-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: .9rem; padding: .85rem 1rem; color: var(--text); }
+.hm-ic { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: rgba(34,211,238,.12); color: var(--accent); }
+.hm-main b { display: block; font-weight: 500; }
+.hm-main small { display: block; color: var(--muted); font-family: var(--mono); font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
+.hm-copy { flex: none; display: inline-flex; align-items: center; gap: .3rem; margin-right: .8rem; padding: .4rem .75rem; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: .78rem; cursor: pointer; }
+.hm-copy:hover { color: var(--accent); border-color: var(--accent); }
+@keyframes hmfade { from { opacity: 0; } }
+@keyframes hmpop { from { opacity: 0; transform: translateY(18px) scale(.96); } }
+
+/* Company logo */
+.co-logo { display: block; width: 150px; height: 56px; margin-bottom: .9rem; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid rgba(255,255,255,.14); box-shadow: 0 8px 24px -10px rgba(34,211,238,.4); }
+.co-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }

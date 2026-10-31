@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { TypeAnimation } from 'react-type-animation';
-import { Github, Linkedin, Mail, MapPin, ArrowUpRight, Download, Menu, X } from 'lucide-react';
+import { Github, Linkedin, Mail, MapPin, ArrowUpRight, Download, Menu, X, Phone, MessageCircle, Copy, Check } from 'lucide-react';
 
 const GH = 'https://github.com/kesavanelumalai/';
 const LI = 'https://www.linkedin.com/posts/kesavan-elumalai_';
 
 const nav = ['about', 'skills', 'experience', 'projects', 'education', 'certifications', 'contact'];
+
+// Contact details used by the Hire me popup. Edit here, or delete a row below.
+const CONTACT = { email: 'kesavan20021111@gmail.com', phone: '+919361816131', phoneShow: '+91 93618 16131' };
 
 const focus = [
   ['Computer Vision & Medical Imaging', 'Training classification, detection and segmentation models on MRI, CT and X-ray data using PyTorch and cloud GPUs.'],
@@ -25,7 +28,7 @@ const skills: [string, string[]][] = [
 
 const experience = [
   {
-    date: 'Feb 2026 – Present', role: 'Software Developer Trainee', org: 'Mazo Solutions Pvt Ltd.',
+    date: 'Feb 2026 – Present', role: 'Software Developer Trainee', org: 'Mazo Solutions Pvt Ltd.', logo: '/assets/logos/mazo.jpg',
     points: [
       'Build and train deep learning models for medical image classification, detection and segmentation on cloud GPUs.',
       'Develop end-to-end ML pipelines: preprocessing, cross-validated training, inference and evaluation.',
@@ -110,6 +113,8 @@ const Section = ({ id, title, children }: { id: string; title: string; children:
 
 const Index = () => {
   const [open, setOpen] = useState(false);
+  const [hireOpen, setHireOpen] = useState(false);
+  const [copied, setCopied] = useState('');
   const [active, setActive] = useState('home');
   const navRef = useRef<HTMLElement>(null);
   const [ink, setInk] = useState({ left: 0, width: 0, on: false });
@@ -158,9 +163,56 @@ const Index = () => {
     return () => window.removeEventListener('mousemove', move);
   }, []);
 
+
+  useEffect(() => {
+    if (!hireOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setHireOpen(false); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [hireOpen]);
+
+  const copy = async (text: string, key: string) => {
+    try { await navigator.clipboard.writeText(text); }
+    catch { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+    setCopied(key);
+    setTimeout(() => setCopied(''), 1800);
+  };
+
+  const hireRows = [
+    { key: 'mail', icon: <Mail size={20} />, label: 'Send an email', value: CONTACT.email, copy: CONTACT.email, ext: false,
+      href: 'mailto:' + CONTACT.email + '?subject=' + encodeURIComponent('Hiring enquiry from your portfolio') + '&body=' + encodeURIComponent('Hi Kesavan,\n\nI would like to discuss a project or role.\n\nName:\nCompany:\nWhat I need:\n') },
+    { key: 'call', icon: <Phone size={20} />, label: 'Call me', value: CONTACT.phoneShow, copy: CONTACT.phone, ext: false, href: 'tel:' + CONTACT.phone },
+    { key: 'wa', icon: <MessageCircle size={20} />, label: 'WhatsApp', value: 'Chat with me', copy: '', ext: true,
+      href: 'https://wa.me/' + CONTACT.phone.replace('+', '') + '?text=' + encodeURIComponent('Hi Kesavan, I found your portfolio and would like to talk.') },
+  ];
+
   return (
     <div className="site">
       <div className="progress" aria-hidden="true" />
+      {hireOpen && (
+        <div className="hm-back" onClick={() => setHireOpen(false)}>
+          <div className="hm" role="dialog" aria-modal="true" aria-labelledby="hm-title" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="hm-x" aria-label="Close" onClick={() => setHireOpen(false)}><X size={18} /></button>
+            <p className="hello">&gt; open to opportunities</p>
+            <h3 id="hm-title">Let's work together</h3>
+            <p className="hm-sub">Choose whichever is easiest for you.</p>
+            {hireRows.map((r) => (
+              <div className="hm-row" key={r.key}>
+                <a className="hm-main" href={r.href} target={r.ext ? '_blank' : undefined} rel={r.ext ? 'noopener noreferrer' : undefined}>
+                  <span className="hm-ic">{r.icon}</span>
+                  <span><b>{r.label}</b><small>{r.value}</small></span>
+                </a>
+                {r.copy && (
+                  <button type="button" className="hm-copy" onClick={() => copy(r.copy, r.key)}>
+                    {copied === r.key ? <><Check size={15} /> Copied</> : <><Copy size={15} /> Copy</>}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <header className="nav">
         <div className="wrap nav-in">
           <a href="#home" className="logo">Kesavan<b>.</b></a>
@@ -169,7 +221,7 @@ const Index = () => {
             {nav.map((n) => (
               <a key={n} href={'#' + n} className={active === n ? 'on' : undefined} onClick={() => setOpen(false)}>{n}</a>
             ))}
-            <a href="#contact" className="hire" onClick={() => setOpen(false)}>Hire me</a>
+            <a href="#contact" role="button" className="hire" onClick={(e) => { e.preventDefault(); setOpen(false); setHireOpen(true); }}>Hire me</a>
           </nav>
           <button className="burger" aria-label="Menu" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
         </div>
@@ -224,6 +276,7 @@ const Index = () => {
         <div className="timeline">
           {experience.map((e) => (
             <div className="tl reveal" key={e.role}>
+              {e.logo && <span className="co-logo"><img src={e.logo} alt={e.org + ' logo'} /></span>}
               <span className="date">{e.date}</span>
               <h3>{e.role}</h3>
               <h4>{e.org}</h4>
