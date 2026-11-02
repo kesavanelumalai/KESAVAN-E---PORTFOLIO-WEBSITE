@@ -121,33 +121,6 @@ input:focus, textarea:focus { outline: none; border-color: var(--accent); }
 }
 @media (max-width: 560px) { .grid3, .stats { grid-template-columns: 1fr; } }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: .10;
-  background-size: 480px 480px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480' fill='none' stroke='%2322d3ee' stroke-width='1'%3E%3Cpath d='M40 60L170 20M40 60L170 130M40 180L170 130M40 180L170 240M40 300L170 240M40 300L170 350M170 20L300 70M170 130L300 70M170 130L300 190M170 240L300 190M170 240L300 310M170 350L300 310M300 70L430 120M300 190L430 120M300 190L430 250M300 310L430 250'/%3E%3Cg fill='%2322d3ee' stroke='none'%3E%3Ccircle cx='40' cy='60' r='4'/%3E%3Ccircle cx='40' cy='180' r='4'/%3E%3Ccircle cx='40' cy='300' r='4'/%3E%3Ccircle cx='170' cy='20' r='4'/%3E%3Ccircle cx='170' cy='130' r='4'/%3E%3Ccircle cx='170' cy='240' r='4'/%3E%3Ccircle cx='170' cy='350' r='4'/%3E%3Ccircle cx='300' cy='70' r='4'/%3E%3Ccircle cx='300' cy='190' r='4'/%3E%3Ccircle cx='300' cy='310' r='4'/%3E%3Ccircle cx='430' cy='120' r='4'/%3E%3Ccircle cx='430' cy='250' r='4'/%3E%3C/g%3E%3Cpath stroke='%23a78bfa' d='M0 430H110L140 460H260L290 430H480'/%3E%3Ccircle cx='110' cy='430' r='3' fill='%23a78bfa' stroke='none'/%3E%3Ccircle cx='290' cy='430' r='3' fill='%23a78bfa' stroke='none'/%3E%3C/svg%3E");
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  right: -50px;
-  bottom: -40px;
-  width: 440px;
-  height: 440px;
-  z-index: -1;
-  pointer-events: none;
-  opacity: .07;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%2322d3ee' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M100 45V26'/%3E%3Ccircle cx='100' cy='18' r='7'/%3E%3Crect x='40' y='45' width='120' height='100' rx='22'/%3E%3Ccircle cx='75' cy='88' r='13'/%3E%3Ccircle cx='125' cy='88' r='13'/%3E%3Ccircle cx='75' cy='88' r='4' fill='%2322d3ee'/%3E%3Ccircle cx='125' cy='88' r='4' fill='%2322d3ee'/%3E%3Cpath d='M72 122H128M86 122V133M100 122V133M114 122V133'/%3E%3Crect x='20' y='75' width='20' height='40' rx='6'/%3E%3Crect x='160' y='75' width='20' height='40' rx='6'/%3E%3Cpath d='M70 145V168H130V145M56 168H144'/%3E%3C/svg%3E") no-repeat center / contain;
-}
-
-@media (max-width: 860px) {
-  body::after { width: 240px; height: 240px; right: -30px; bottom: -20px; }
-}
 /* Glow shadows */
 .card { transition: transform .25s, border-color .25s, box-shadow .3s; }
 .card:hover { transform: translateY(-6px); border-color: rgba(34,211,238,.55); box-shadow: 0 24px 60px -24px rgba(34,211,238,.4); }
@@ -225,3 +198,48 @@ form.card:hover { transform: none; }
 /* Company logo */
 .co-logo { display: block; width: 150px; height: 56px; margin-bottom: .9rem; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid rgba(255,255,255,.14); box-shadow: 0 8px 24px -10px rgba(34,211,238,.4); }
 .co-logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ===== Animated background ===== */
+body { background: radial-gradient(1200px 700px at 50% -10%, #111a33 0%, var(--bg) 60%) fixed, var(--bg); }
+.bg-fx { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.bg-net { position: absolute; inset: 0; opacity: .9; }
+.bg-aurora i { position: absolute; border-radius: 50%; filter: blur(90px); will-change: transform; }
+.bg-aurora .a1 { width: 46vw; height: 46vw; left: -12vw; top: -14vw; background: radial-gradient(circle, rgba(34,211,238,.30), transparent 68%); animation: drift1 26s ease-in-out infinite alternate; }
+.bg-aurora .a2 { width: 42vw; height: 42vw; right: -10vw; top: 22vh; background: radial-gradient(circle, rgba(167,139,250,.28), transparent 68%); animation: drift2 32s ease-in-out infinite alternate; }
+.bg-aurora .a3 { width: 38vw; height: 38vw; left: 22vw; bottom: -18vw; background: radial-gradient(circle, rgba(240,171,252,.16), transparent 68%); animation: drift3 38s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate(14vw, 10vh) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(-12vw, -12vh) scale(1.2); } }
+@keyframes drift3 { to { transform: translate(-16vw, -8vh) scale(1.1); } }
+.bg-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(5,8,16,.55) 100%); }
+@media (max-width: 860px) { .bg-aurora i { filter: blur(60px); } .bg-net { opacity: .75; } }
+@media (prefers-reduced-motion: reduce) { .bg-aurora i { animation: none; } }
+
+/* Social icons - top right, separate from the nav pill */
+.top-social { position: fixed; top: 14px; right: 24px; z-index: 50; height: 54px; display: flex; align-items: center; gap: .55rem; }
+.top-social a { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); background: rgba(20, 27, 45, .78); backdrop-filter: blur(14px); color: var(--muted); transition: color .2s, border-color .2s, transform .2s, box-shadow .2s; }
+.top-social a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(34, 211, 238, .6); }
+.top-social svg { width: 18px; height: 18px; }
+@media (min-width: 861px) {
+  .nav { width: min(1000px, calc(100% - 200px)); margin-left: clamp(24px, calc(50% - 500px), calc(100% - 1170px)); margin-right: auto; }
+}
+@media (min-width: 861px) and (max-width: 1100px) {
+  .nav .wrap { padding: 0 1rem; }
+  .links-nav a { padding: .4rem .45rem; font-size: .76rem; }
+  .links-nav a.hire { padding: .4rem .9rem; }
+}
+@media (max-width: 860px) {
+  .nav { width: calc(100% - 160px); margin: 14px 0 0 4%; }
+  .top-social { right: 4%; gap: .4rem; }
+  .top-social a { width: 34px; height: 34px; }
+  .top-social svg { width: 16px; height: 16px; }
+}
+
+/* social gap fix */
+@media (min-width: 861px) {
+  .top-social { right: auto; left: calc(clamp(24px, 50% - 500px, 100% - 1170px) + min(1000px, 100% - 200px) + 14px); }
+}
+
+/* Neural cursor */
+.nc-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9999; pointer-events: none; }
+@media (pointer: fine) { html.nc, html.nc a, html.nc button, html.nc [role="button"], html.nc label { cursor: none; } }
+@media (pointer: coarse) { .nc-canvas { display: none; } }

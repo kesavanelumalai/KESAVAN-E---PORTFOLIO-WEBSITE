@@ -111,6 +111,218 @@ const Section = ({ id, title, children }: { id: string; title: string; children:
   </section>
 );
 
+
+const BG = { density: 1 / 15000, maxNodes: 110, link: 150, speed: 0.22, mouseRadius: 190, pulseEvery: 700, cyan: '34,211,238', violet: '167,139,250' };
+type Dot = { x: number; y: number; vx: number; vy: number; r: number; hue: 0 | 1 };
+type Pl = { a: number; b: number; t: number };
+
+const AnimatedBackground = () => {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    if (!canvas || !ctx) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let w = 0, h = 0, dpr = 1, raf = 0, last = 0, lastPulse = 0;
+    let nodes: Dot[] = [];
+    let pulses: Pl[] = [];
+    const mouse = { x: -9999, y: -9999, on: false };
+    const rgba = (hue: 0 | 1, a: number) => 'rgba(' + (hue ? BG.violet : BG.cyan) + ',' + a + ')';
+
+    const build = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(BG.maxNodes, Math.round(w * h * BG.density));
+      nodes = Array.from({ length: count }, () => {
+        const ang = Math.random() * Math.PI * 2;
+        const sp = BG.speed * (0.4 + Math.random() * 0.8);
+        return { x: Math.random() * w, y: Math.random() * h, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+          r: 1.2 + Math.random() * 1.8, hue: (Math.random() < 0.25 ? 1 : 0) as 0 | 1 };
+      });
+      pulses = [];
+    };
+
+    const draw = (dt: number, now: number) => {
+      ctx.clearRect(0, 0, w, h);
+      for (const n of nodes) {
+        n.x += n.vx * dt; n.y += n.vy * dt;
+        if (n.x < -20) n.x = w + 20; else if (n.x > w + 20) n.x = -20;
+        if (n.y < -20) n.y = h + 20; else if (n.y > h + 20) n.y = -20;
+      }
+      ctx.lineWidth = 1;
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+          if (d2 > BG.link * BG.link) continue;
+          const k = 1 - Math.sqrt(d2) / BG.link;
+          let boost = 0;
+          if (mouse.on) {
+            const mx = (a.x + b.x) / 2 - mouse.x, my = (a.y + b.y) / 2 - mouse.y;
+            const md = Math.sqrt(mx * mx + my * my);
+            if (md < BG.mouseRadius) boost = (1 - md / BG.mouseRadius) * 0.45;
+          }
+          ctx.strokeStyle = rgba(a.hue, 0.14 * k + boost * k);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+      for (const n of nodes) {
+        let glow = 0;
+        if (mouse.on) {
+          const dx = n.x - mouse.x, dy = n.y - mouse.y, d = Math.sqrt(dx * dx + dy * dy);
+          if (d < BG.mouseRadius) glow = 1 - d / BG.mouseRadius;
+        }
+        ctx.fillStyle = rgba(n.hue, 0.45 + glow * 0.5);
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r + glow * 2.2, 0, Math.PI * 2); ctx.fill();
+        if (glow > 0.15) {
+          ctx.fillStyle = rgba(n.hue, glow * 0.12);
+          ctx.beginPath(); ctx.arc(n.x, n.y, 16 + glow * 14, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      if (now - lastPulse > BG.pulseEvery && nodes.length > 2 && pulses.length < 14) {
+        lastPulse = now;
+        const a = Math.floor(Math.random() * nodes.length);
+        let best = -1, bestD = BG.link * BG.link;
+        for (let j = 0; j < nodes.length; j++) {
+          if (j === a) continue;
+          const dx = nodes[a].x - nodes[j].x, dy = nodes[a].y - nodes[j].y, d2 = dx * dx + dy * dy;
+          if (d2 < bestD && Math.random() < 0.5) { bestD = d2; best = j; }
+        }
+        if (best >= 0) pulses.push({ a, b: best, t: 0 });
+      }
+      pulses = pulses.filter((p) => p.t < 1);
+      for (const p of pulses) {
+        p.t += dt * 0.012;
+        const a = nodes[p.a], b = nodes[p.b];
+        if (!a || !b) continue;
+        const x = a.x + (b.x - a.x) * p.t, y = a.y + (b.y - a.y) * p.t;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 14);
+        g.addColorStop(0, 'rgba(255,255,255,' + 0.9 * (1 - p.t * 0.4) + ')');
+        g.addColorStop(0.25, rgba(0, 0.55));
+        g.addColorStop(1, rgba(0, 0));
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
+      }
+    };
+
+    const loop = (now: number) => {
+      const dt = Math.min(48, now - last) / 16.67 || 1;
+      last = now; draw(dt, now); raf = requestAnimationFrame(loop);
+    };
+    const start = () => { cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(loop); };
+    const stop = () => cancelAnimationFrame(raf);
+    const onMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true; };
+    const onLeave = () => { mouse.on = false; };
+    const onResize = () => { build(); if (reduce) draw(0, 0); };
+    const onVis = () => { if (document.hidden) stop(); else if (!reduce) start(); };
+
+    build();
+    if (reduce) draw(0, 0); else start();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('mousemove', onMove, { passive: true });
+    document.addEventListener('mouseleave', onLeave);
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      stop();
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseleave', onLeave);
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, []);
+
+  return (
+    <div className="bg-fx" aria-hidden="true">
+      <div className="bg-aurora"><i className="a1" /><i className="a2" /><i className="a3" /></div>
+      <canvas ref={ref} className="bg-net" />
+      <div className="bg-vignette" />
+    </div>
+  );
+};
+
+
+const NeuralCursor = () => {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    const canvas = ref.current;
+    const cx = canvas ? canvas.getContext('2d') : null;
+    if (!canvas || !cx) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lead = reduce ? 1 : 0.45, follow = reduce ? 1 : 0.32;
+    document.documentElement.classList.add('nc');
+    let raf = 0, on = false, hov = false, typing = false;
+    const m = { x: 0, y: 0 };
+    const chain = Array.from({ length: 10 }, () => ({ x: 0, y: 0 }));
+
+    const size = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    const glow = (x: number, y: number, rad: number) => {
+      const g = cx.createRadialGradient(x, y, 0, x, y, rad);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.25, 'rgba(34,211,238,.6)');
+      g.addColorStop(1, 'rgba(34,211,238,0)');
+      cx.fillStyle = g;
+      cx.beginPath(); cx.arc(x, y, rad, 0, Math.PI * 2); cx.fill();
+    };
+    const frame = () => {
+      cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      if (on && !typing) {
+        chain[0].x += (m.x - chain[0].x) * lead;
+        chain[0].y += (m.y - chain[0].y) * lead;
+        for (let i = 1; i < chain.length; i++) {
+          chain[i].x += (chain[i - 1].x - chain[i].x) * follow;
+          chain[i].y += (chain[i - 1].y - chain[i].y) * follow;
+        }
+        cx.lineWidth = 1.2;
+        for (let i = 1; i < chain.length; i++) {
+          cx.strokeStyle = 'rgba(34,211,238,' + 0.6 * (1 - i / chain.length) + ')';
+          cx.beginPath(); cx.moveTo(chain[i - 1].x, chain[i - 1].y); cx.lineTo(chain[i].x, chain[i].y); cx.stroke();
+        }
+        for (let i = chain.length - 1; i > 0; i--) {
+          cx.fillStyle = (i % 3 === 0 ? 'rgba(167,139,250,' : 'rgba(34,211,238,') + 0.8 * (1 - i / chain.length) + ')';
+          cx.beginPath(); cx.arc(chain[i].x, chain[i].y, 2.6 * (1 - i / chain.length) + 0.6, 0, Math.PI * 2); cx.fill();
+        }
+        glow(chain[0].x, chain[0].y, hov ? 22 : 15);
+        if (hov) {
+          cx.strokeStyle = 'rgba(34,211,238,.7)'; cx.lineWidth = 1.5;
+          cx.beginPath(); cx.arc(chain[0].x, chain[0].y, 20, 0, Math.PI * 2); cx.stroke();
+        }
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!on) chain.forEach((c) => { c.x = e.clientX; c.y = e.clientY; });
+      m.x = e.clientX; m.y = e.clientY; on = true;
+      const t = e.target as HTMLElement | null;
+      hov = !!(t && t.closest && t.closest('a,button,[role="button"],.card'));
+      typing = !!(t && t.closest && t.closest('input,textarea'));
+    };
+    const onLeave = () => { on = false; };
+
+    size();
+    raf = requestAnimationFrame(frame);
+    window.addEventListener('resize', size);
+    window.addEventListener('mousemove', onMove, { passive: true });
+    document.addEventListener('mouseleave', onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.documentElement.classList.remove('nc');
+      window.removeEventListener('resize', size);
+      window.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
+  return <canvas ref={ref} className="nc-canvas" aria-hidden="true" />;
+};
+
 const Index = () => {
   const [open, setOpen] = useState(false);
   const [hireOpen, setHireOpen] = useState(false);
@@ -189,6 +401,8 @@ const Index = () => {
 
   return (
     <div className="site">
+      <AnimatedBackground />
+      <NeuralCursor />
       <div className="progress" aria-hidden="true" />
       {hireOpen && (
         <div className="hm-back" onClick={() => setHireOpen(false)}>
@@ -213,6 +427,11 @@ const Index = () => {
           </div>
         </div>
       )}
+      <div className="top-social">
+              <a href="https://www.linkedin.com/in/kesavan-elumalai/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin /></a>
+              <a href="https://github.com/kesavanelumalai" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github /></a>
+              <a href="mailto:kesavan20021111@gmail.com" aria-label="Email"><Mail /></a>
+            </div>
       <header className="nav">
         <div className="wrap nav-in">
           <a href="#home" className="logo">Kesavan<b>.</b></a>
@@ -238,11 +457,6 @@ const Index = () => {
             <div className="cta">
               <a className="btn primary" href="#contact">Contact me</a>
               <a className="btn ghost" href="/assets/Kesavan_E_Data_Scientist.pdf" target="_blank" rel="noopener noreferrer"><Download size={16} /> Resume</a>
-            </div>
-            <div className="social">
-              <a href="https://www.linkedin.com/in/kesavan-elumalai/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin /></a>
-              <a href="https://github.com/kesavanelumalai" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github /></a>
-              <a href="mailto:kesavan20021111@gmail.com" aria-label="Email"><Mail /></a>
             </div>
           </div>
           <div className="photo"><img src="/assets/kesavan.jpeg" alt="Kesavan E" /><span className="chip c1">PyTorch</span><span className="chip c2">YOLOv8</span><span className="chip c3">RAG</span></div>
