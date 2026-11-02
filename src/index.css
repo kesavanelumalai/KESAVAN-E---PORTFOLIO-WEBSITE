@@ -242,4 +242,4 @@ body { background: radial-gradient(1200px 700px at 50% -10%, #111a33 0%, var(--b
 /* Neural cursor */
 .nc-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9999; pointer-events: none; }
 @media (pointer: fine) { html.nc, html.nc a, html.nc button, html.nc [role="button"], html.nc label { cursor: none; } }
-@media (pointer: coarse) { .nc-canvas { display: none; } }
+

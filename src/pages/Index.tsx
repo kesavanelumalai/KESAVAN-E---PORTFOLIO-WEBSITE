@@ -247,21 +247,24 @@ const AnimatedBackground = () => {
 const NeuralCursor = () => {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return;
     const canvas = ref.current;
     const cx = canvas ? canvas.getContext('2d') : null;
     if (!canvas || !cx) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fine = window.matchMedia('(pointer: fine)').matches;
     const lead = reduce ? 1 : 0.45, follow = reduce ? 1 : 0.32;
-    document.documentElement.classList.add('nc');
-    let raf = 0, on = false, hov = false, typing = false;
+    if (fine) document.documentElement.classList.add('nc');
+    let raf = 0, on = false, hov = false, typing = false, a = 0, lastTouch = 0;
     const m = { x: 0, y: 0 };
     const chain = Array.from({ length: 10 }, () => ({ x: 0, y: 0 }));
+    let ripples: { x: number; y: number; t: number }[] = [];
 
     const size = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
       cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     const glow = (x: number, y: number, rad: number) => {
@@ -274,7 +277,9 @@ const NeuralCursor = () => {
     };
     const frame = () => {
       cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      if (on && !typing) {
+      a = Math.max(0, Math.min(1, a + (on ? 0.25 : -0.05)));
+      if (a > 0.01 && !typing) {
+        cx.globalAlpha = a;
         chain[0].x += (m.x - chain[0].x) * lead;
         chain[0].y += (m.y - chain[0].y) * lead;
         for (let i = 1; i < chain.length; i++) {
@@ -295,29 +300,66 @@ const NeuralCursor = () => {
           cx.strokeStyle = 'rgba(34,211,238,.7)'; cx.lineWidth = 1.5;
           cx.beginPath(); cx.arc(chain[0].x, chain[0].y, 20, 0, Math.PI * 2); cx.stroke();
         }
+        cx.globalAlpha = 1;
       }
-      raf = requestAnimationFrame(frame);
+      ripples = ripples.filter((r) => r.t < 1);
+      for (const r of ripples) {
+        r.t += 0.035;
+        cx.strokeStyle = 'rgba(34,211,238,' + 0.7 * (1 - r.t) + ')';
+        cx.lineWidth = 2;
+        cx.beginPath(); cx.arc(r.x, r.y, 8 + r.t * 46, 0, Math.PI * 2); cx.stroke();
+      }
+      raf = (on || a > 0.01 || ripples.length) ? requestAnimationFrame(frame) : 0;
     };
-    const onMove = (e: MouseEvent) => {
-      if (!on) chain.forEach((c) => { c.x = e.clientX; c.y = e.clientY; });
-      m.x = e.clientX; m.y = e.clientY; on = true;
-      const t = e.target as HTMLElement | null;
+    const ensure = () => { if (!raf) raf = requestAnimationFrame(frame); };
+    const ripple = (x: number, y: number) => { if (!typing) ripples.push({ x, y, t: 0 }); ensure(); };
+    const begin = (x: number, y: number, target: EventTarget | null) => {
+      if (!on || a < 0.05) chain.forEach((c) => { c.x = x; c.y = y; });
+      m.x = x; m.y = y; on = true;
+      const t = target as HTMLElement | null;
       hov = !!(t && t.closest && t.closest('a,button,[role="button"],.card'));
       typing = !!(t && t.closest && t.closest('input,textarea'));
+      ensure();
     };
+
+    const onMouseMove = (e: MouseEvent) => { if (Date.now() - lastTouch < 800) return; begin(e.clientX, e.clientY, e.target); };
+    const onMouseDown = (e: MouseEvent) => { if (Date.now() - lastTouch < 800) return; ripple(e.clientX, e.clientY); };
     const onLeave = () => { on = false; };
+    const onTouchStart = (e: TouchEvent) => {
+      lastTouch = Date.now();
+      const t = e.touches[0];
+      if (!t) return;
+      begin(t.clientX, t.clientY, e.target);
+      ripple(t.clientX, t.clientY);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      lastTouch = Date.now();
+      const t = e.touches[0];
+      if (!t) return;
+      m.x = t.clientX; m.y = t.clientY; on = true; ensure();
+    };
+    const onTouchEnd = () => { lastTouch = Date.now(); on = false; };
 
     size();
-    raf = requestAnimationFrame(frame);
     window.addEventListener('resize', size);
-    window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mousedown', onMouseDown, { passive: true });
     document.addEventListener('mouseleave', onLeave);
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', onTouchEnd, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
       document.documentElement.classList.remove('nc');
       window.removeEventListener('resize', size);
-      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
     };
   }, []);
   return <canvas ref={ref} className="nc-canvas" aria-hidden="true" />;
