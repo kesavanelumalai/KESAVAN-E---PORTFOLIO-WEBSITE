@@ -495,7 +495,7 @@ const Index = () => {
             <h1>
               <TypeAnimation sequence={['Machine Learning Engineer', 2200, 'Data Scientist', 2200, 'AI Engineer', 2200]} speed={50} repeat={Infinity} wrapper="span" />
             </h1>
-            <p className="sub">I build machine learning systems for computer vision, medical imaging and LLM applications. Currently a Software Developer Trainee at Mazo Solutions, with an M.Sc. in Data Science and a B.Sc. in Statistics.</p>
+            <p className="sub">I turn messy data into reliable, production-ready machine learning solutions. As an end-to-end engineer, I own the entire lifecycle—from data cleaning and model training to deployment and evaluation. Whether building applications in computer vision, NLP, or LLMs, my background in statistics ensures that my results are always rigorous, measurable, and built to scale.</p>
             <div className="cta">
               <a className="btn primary" href="#contact">Contact me</a>
               <a className="btn ghost" href="/assets/Kesavan_E_Data_Scientist.pdf" target="_blank" rel="noopener noreferrer"><Download size={16} /> Resume</a>
